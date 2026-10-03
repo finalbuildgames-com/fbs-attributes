@@ -2,16 +2,16 @@
  * fbs/attributes.h — FinalBuildSystems numeric attribute with modifiers.
  * C99, engine independent, libm only (round).
  *
- * Model (decision: docs/decisions/attributes.md): one attribute holds a base
- * value and modifiers. Each modifier has a channel (uint16, evaluated in
- * ascending numeric order), an operation and a value. Within a channel the
- * buckets combine commutatively, and sums and products are accumulated in
- * ascending (value, handle) order, so the result is bit-identical for the same
- * multiset of (channel, op, value) regardless of insertion order or handles,
- * and bit-stable across save/load. The one exception is OVERRIDE: when a
- * channel holds several overrides the lowest handle wins, so that result does
- * depend on insertion order by design. Bit-exactness assumes FLT_EVAL_METHOD 0
- * (every 64-bit target and wasm32; x87 builds need -mfpmath=sse). Contract:
+ * Model: one attribute holds a base value and modifiers. Each modifier has a
+ * channel (uint16, evaluated in ascending numeric order), an operation and a
+ * value. Within a channel the buckets combine commutatively, and sums and
+ * products are accumulated in ascending (value, handle) order, so the result
+ * is bit-identical for the same multiset of (channel, op, value) regardless of
+ * insertion order or handles, and bit-stable across save/load. The one
+ * exception is OVERRIDE: when a channel holds several overrides the lowest
+ * handle wins, so that result does depend on insertion order by design.
+ * Bit-exactness assumes FLT_EVAL_METHOD 0 (every 64-bit target and wasm32; x87
+ * builds need -mfpmath=sse). Contract:
  *
  *   v = base                                    (double for every type)
  *   for each channel with modifiers, ascending:
@@ -143,7 +143,7 @@ fbs_attr_status fbs_attr_set_observer(fbs_attr *a, fbs_attr_observer observer, v
 /* Increments on every effective change; lets polling hosts (WASM) skip callbacks. */
 uint32_t fbs_attr_revision(const fbs_attr *a);
 
-/* Deterministic little-endian schema (docs/decisions/attributes.md section 8):
+/* Deterministic little-endian schema (magic "FBSA", version 1):
  * modifiers emitted sorted by (channel, op, handle); next handle persisted. */
 size_t fbs_attr_serialized_size(const fbs_attr *a);
 fbs_attr_status fbs_attr_serialize(const fbs_attr *a, void *buf, size_t cap, size_t *out_len);

@@ -4,7 +4,7 @@
  * Self-contained: no test framework. Exit code = number of failures (clamped
  * to 100 so it survives the 8-bit exit status; the true count is printed).
  *
- * Covers docs/decisions/attributes.md section 8: A-T1..A-T11 and A-T13..A-T15
+ * Covers the test plan witnesses A-T1..A-T11 and A-T13..A-T15
  * (A-T12 is void because no fold/stack helper exists), plus allocator failure,
  * capacity exhaustion, every E_TRUNCATED path, NULL/bad-enum validation on
  * every entry point, the status-name/version functions and a committed golden

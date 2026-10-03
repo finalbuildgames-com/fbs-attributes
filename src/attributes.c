@@ -4,13 +4,14 @@
  *
  * Derived from PipeRift/AttributesExtension (Apache License 2.0, Copyright
  * 2015-2026 Piperift) at commit d479b32106d403ac1429287d981df123d15d8669,
- * rewritten in C with changed semantics; see docs/decisions/attributes.md,
- * docs/sources/attributes-inventory.md and third_party/piperift/NOTICE.md.
+ * rewritten in C with changed semantics; see third_party/piperift/NOTICE.md.
  * These files have been changed from the original work: the sequential,
  * order-dependent application model of the original is deliberately replaced
- * by the commutative bucketed contract of docs/decisions/attributes.md
- * section 4.2, which fixes the source defects A-1 .. A-15 recorded in
- * docs/sources/attributes-inventory.md section 11.
+ * by the commutative bucketed contract documented in include/fbs/attributes.h.
+ * That fixes defects of the source, among them category order that depended
+ * on insertion history, modifier ids that collided after a load, no clamping
+ * or int32 range check, silently dropped near-zero modifiers and unguarded
+ * reentrancy from change handlers.
  *
  * C99. Standard library plus round/isfinite from libm. No globals, no static
  * mutable state.
@@ -623,7 +624,7 @@ fbs_attr_status fbs_attr_set_observer(fbs_attr *a, fbs_attr_observer observer, v
 uint32_t fbs_attr_revision(const fbs_attr *a) { return a ? a->revision : 0u; }
 
 /* ------------------------------------------------------------------------- */
-/* Serialization (docs/decisions/attributes.md section 4.3)                   */
+/* Serialization                                                             */
 /* ------------------------------------------------------------------------- */
 
 static void fbs_attr_put_u16(unsigned char *p, unsigned v) {
