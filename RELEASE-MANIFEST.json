@@ -1,12 +1,13 @@
 {
   "module": "attributes",
-  "source_commit": "9c246abdc04d0c1f8f90545f7c2694a02291adad",
+  "source_commit": "cd0f7ae445d7ccad81b9d6b601d088b66ae6d061",
   "source_files": [
     "src/attributes.c",
     "include/fbs/attributes.h",
     "tests/test_attributes.c",
     "tests/fixtures/attributes/attr.bin",
-    "third_party/piperift/LICENSE-AttributesExtension"
+    "third_party/piperift/LICENSE-AttributesExtension",
+    "tools/release/readmes/attributes.md"
   ],
   "history": "fresh initial commit, later squashed snapshots"
 }
