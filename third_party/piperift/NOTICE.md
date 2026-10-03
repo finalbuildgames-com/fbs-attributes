@@ -1,0 +1,1 @@
+Derived from https://github.com/PipeRift/AttributesExtension, commit d479b32106d403ac1429287d981df123d15d8669, Apache-2.0, Copyright 2015-2026 Piperift. The source was rewritten in C with changed semantics. Retain this notice and LICENSE-AttributesExtension when redistributing derived portions.

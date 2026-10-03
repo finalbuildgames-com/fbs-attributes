@@ -1,0 +1,12 @@
+{
+  "module": "attributes",
+  "source_commit": "9c246abdc04d0c1f8f90545f7c2694a02291adad",
+  "source_files": [
+    "src/attributes.c",
+    "include/fbs/attributes.h",
+    "tests/test_attributes.c",
+    "tests/fixtures/attributes/attr.bin",
+    "third_party/piperift/LICENSE-AttributesExtension"
+  ],
+  "history": "fresh initial commit, later squashed snapshots"
+}
