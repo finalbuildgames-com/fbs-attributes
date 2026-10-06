@@ -1,6 +1,7 @@
 # fbs-attributes
 
-A numeric game stat (health, damage) with stacked modifiers whose final value does not depend on the order they were added, in C99.
+Numeric game stats such as health or damage, with channel-ordered stacked modifiers
+and explicit override precedence, in C99.
 
 ## What it does
 
@@ -74,10 +75,14 @@ Build it with `add_executable(demo main.c)` and `target_link_libraries(demo PRIV
 
 ## Build and test
 
+Run from this repository's root. In addition to CMake and the compiler named
+below, install the build tool selected by your generator (for example Make or
+Ninja).
+
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build build --parallel 2
-ctest --test-dir build --output-on-failure --no-tests=error
+cmake --build build --parallel 1
+(cd build && ctest --output-on-failure)
 ```
 
 This builds the library (`fbs::attributes`), the test program `fbs_test_attributes` (ctest name `attributes`) and `fbs_attributes_example` from `examples/basic.c` (ctest name `attributes_example`), which creates an attribute and prints the API version. `-DFBS_BUILD_TESTS=OFF` and `-DFBS_BUILD_EXAMPLES=OFF` skip them.
@@ -101,9 +106,29 @@ target_link_libraries(your_target PRIVATE fbs::attributes)
 
 This repository ships the C library only. No engine bindings or adapters are included.
 
+## Build modes and installation
+
+`BUILD_SHARED_LIBS=ON` builds a shared library; the default is static.
+`FBS_BUILD_TESTS` and `BUILD_TESTING` together enable the core test.
+`FBS_BUILD_EXAMPLES` controls `fbs_attributes_example`; its CTest entry also requires
+`BUILD_TESTING`. For a library-only build, set `FBS_BUILD_TESTS=OFF` and
+`FBS_BUILD_EXAMPLES=OFF`.
+
+```sh
+cmake --install build --prefix "$PWD/install"
+```
+
+Installation supplies [the public header](include/fbs/attributes.h), the library,
+license notices and `FinalBuildAttributesTargets.cmake` under
+`${CMAKE_INSTALL_LIBDIR}/cmake/FinalBuildAttributes`. It supplies no package config or
+version config, so `find_package(FinalBuildAttributes)` is unavailable. A consumer may
+include the installed targets file explicitly and link `fbs::attributes`, or use
+the source integration above. The [minimal program](examples/basic.c) and
+[core tests](tests/test_attributes.c) show the implemented entry points.
+
 ## Design notes
 
-- **Determinism.** Inside each (channel, op) bucket, sums and products are taken in ascending (value, handle) order, so the result depends only on the set of (channel, op, value) triples. `tests/test_attributes.c` checks this on all 720 insertion orders of four 6-modifier sets, including sets where float addition order changes the result (A-T2), on 400 random sets built in 8 random orders each, and in 36 randomized rounds of 200 operations compared bit for bit against an independent reference evaluator for F64, F32 and I32 (A-T15).
+- **Determinism.** Inside each (channel, op) bucket, sums and products are taken in ascending (value, handle) order, so ordinary modifier buckets depend only on the set of (channel, op, value) triples. Multiple OVERRIDEs remain the documented exception: the earliest handle wins. `tests/test_attributes.c` checks this on all 720 insertion orders of four 6-modifier sets, including sets where float addition order changes the result (A-T2), on 400 random sets built in 8 random orders each, and in 36 randomized rounds of 200 operations compared bit for bit against an independent reference evaluator for F64, F32 and I32 (A-T15).
 - **Serialization.** Modifiers are written sorted by (channel, op, handle), and the next handle is stored. The blob is 28 bytes, plus 16 if a clamp is set, plus 24 per modifier. Re-serializing a loaded blob gives the same bytes (A-T13). The observer and the revision counter are not saved.
 - **Memory.** `fbs_attr_create` and `fbs_attr_deserialize` make one allocation sized by `max_modifiers`; nothing else is allocated afterwards (`test_allocator`). Pass an `fbs_attr_allocator` (`alloc`, `free`, `user`) or `NULL` for `malloc`/`free`. `fbs_attr_memory` returns the block size. `fbs_attr_serialize` writes into your buffer; `fbs_attr_serialized_size` tells you how big it must be.
 - **Threading.** No globals or static mutable state, so separate attributes are independent. There is no locking, so guard a shared attribute yourself.
